@@ -2,14 +2,16 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Release.Name }}-migrate-db
-  {{- with .Values.iq_server.migrationJobAnnotations }}
+  {{- with .Values.iq_server.migrationJob.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   completions: 1
   parallelism: 1
-  ttlSecondsAfterFinished: 0
+  {{- if .Values.iq_server.migrationJob.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.iq_server.migrationJob.ttlSecondsAfterFinished }}
+  {{- end }}
   template:
     spec:
       serviceAccountName: {{ .Values.iq_server.serviceAccountName }}
