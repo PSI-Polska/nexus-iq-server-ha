@@ -51,6 +51,13 @@ spec:
               - key: fluentd
                 path: fluentd.yaml
         {{- end }}
+        {{- if .Values.iq_server.additionalCertificates.secretName }}
+        - name: keystore
+          emptyDir: {}
+        - name: certs
+          secret:
+            secretName: {{ .Values.iq_server.additionalCertificates.secretName }}
+        {{- end }}
       containers:
         - name: {{ .Release.Name }}-iq-server-container
           image: {{ include "nexus-iq-server-ha.iqServerImage" . }}
@@ -100,6 +107,10 @@ spec:
             {{- if and (.Values.fluentd.enabled) (.Values.iq_server.fluentd.forwarder.enabled) }}
             - mountPath: "/var/log/nexus-iq-server"
               name: {{ .Release.Name }}-iq-server-pod-logs
+            {{- end }}
+            {{- if .Values.iq_server.additionalCertificates.secretName }}
+            - name: keystore
+              mountPath: /var/ssl
             {{- end }}
           env:
             {{- if or (.Values.iq_server.licenseSecret) (.Values.iq_server.license) }}
@@ -229,3 +240,20 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.iq_server.config.clusterDirectory }}
               name: {{ .Release.Name }}-iq-server-pod-volume
+        {{- if .Values.iq_server.additionalCertificates.secretName }}
+        - name: {{ .Release.Name }}-import-certs
+          image: {{ include "nexus-iq-server-ha.busyboxImage" . }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e;
+              cp /etc/alternatives/jre/lib/security/cacerts /var/ssl/cacerts;
+              chmod 664 /var/ssl/cacerts;
+              for crt in /tmp/crt/*.*;do echo "Adding $crt to keystore"; keytool -import -keystore /var/ssl/cacerts -storepass changeit -noprompt -alias $(echo $(basename $crt)) -file $crt; done;
+          volumeMounts:
+            - name: keystore
+              mountPath: /var/ssl
+            - name: certs
+              mountPath: /tmp/crt  
+        {{ end }}
