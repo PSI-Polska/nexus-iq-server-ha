@@ -43,6 +43,9 @@ iq_server:
   # your known hosts file content
   sshKnownHostsSecret:
 
+  additionalCertificates:
+    secretName:
+
   # Database (PostgreSQL 10.7 or newer or a PostgreSQL-compatible service)
   database:
     hostname:
