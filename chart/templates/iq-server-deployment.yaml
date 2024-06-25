@@ -110,7 +110,8 @@ spec:
             {{- end }}
             {{- if .Values.iq_server.additionalCertificatesSecret }}
             - name: keystore
-              mountPath: /keystore
+              mountPath: /etc/alternatives/jre/lib/security/cacerts
+              subPath: cacerts
             {{- end }}
           env:
             {{- if or (.Values.iq_server.licenseSecret) (.Values.iq_server.license) }}
@@ -248,13 +249,13 @@ spec:
             - -c
             - |
               set -e;
-              cp /etc/java/java-1.8.0-openjdk/java-1.8.0-openjdk-1.8.0.412.b08-2.el9.x86_64/lib/security/cacerts /keystore/cacerts;
+              cp /etc/alternatives/jre/lib/security/cacerts /keystore/cacerts;
               chmod 664 /keystore/cacerts;
-              for crt in /tmp/crt/*.*;do echo "Adding $crt to keystore"; keytool -import -keystore /keystore/cacerts -storepass changeit -noprompt -alias $(echo $(basename $crt)) -file $crt; done;
+              for crt in /tmp/certs/*.*;do echo "Adding $crt to keystore"; keytool -import -keystore /keystore/cacerts -storepass changeit -noprompt -alias $(echo $(basename $crt)) -file $crt; done;
           volumeMounts:
             - name: keystore
-              mountPath: /etc/java/java-1.8.0-openjdk/java-1.8.0-openjdk-1.8.0.412.b08-2.el9.x86_64/lib/security/cacerts
+              mountPath: /keystore
               subPath: cacerts
             - name: certs
-              mountPath: /tmp/crt  
+              mountPath: /tmp/certs
         {{ end }}
