@@ -255,7 +255,6 @@ spec:
           volumeMounts:
             - name: keystore
               mountPath: /keystore
-              subPath: cacerts
             - name: certs
               mountPath: /tmp/certs
         {{ end }}
