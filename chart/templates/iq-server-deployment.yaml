@@ -251,7 +251,13 @@ spec:
               set -e;
               cp /etc/alternatives/jre/lib/security/cacerts /keystore/cacerts;
               chmod 664 /keystore/cacerts;
-              for crt in /tmp/certs/*.*;do echo "Adding $crt to keystore"; keytool -import -keystore /keystore/cacerts -storepass changeit -noprompt -alias $(echo $(basename $crt)) -file $crt; done;
+              for crt in /tmp/certs/*.*
+              do
+                echo "Adding $crt to keystore";
+                keytool -import -keystore /keystore/cacerts -storepass changeit -noprompt -alias $(basename $crt) -file $crt;
+                cp $crt /etc/pki/ca-trust/source/anchors/$(basename $crt)
+              done;
+              update-ca-trust
           volumeMounts:
             - name: keystore
               mountPath: /keystore
