@@ -242,7 +242,7 @@ spec:
               name: {{ .Release.Name }}-iq-server-pod-volume
         {{- if .Values.iq_server.additionalCertificatesSecret }}
         - name: {{ .Release.Name }}-import-certs
-          image: {{ include "nexus-iq-server-ha.busyboxImage" . }}
+          image: {{ include "nexus-iq-server-ha.iqServerImage" . }}
           command:
             - /bin/sh
             - -c
