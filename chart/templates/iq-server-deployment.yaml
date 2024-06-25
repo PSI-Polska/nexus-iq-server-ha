@@ -261,7 +261,6 @@ spec:
                 keytool -import -keystore /keystore/cacerts -storepass changeit -noprompt -alias $(basename $crt) -file $crt;
                 cp $crt /anchors/$(basename $crt);
               done;
-              update-ca-trust;
           volumeMounts:
             - name: keystore
               mountPath: /keystore
