@@ -248,6 +248,8 @@ spec:
             - -c
             - |
               set -e;
+              cp /etc/alternatives/jre/lib/security/cacerts /keystore/cacerts;
+              chmod 664 /keystore/cacerts;
               for crt in /tmp/crt/*.*;do echo "Adding $crt to keystore"; keytool -import -keystore /keystore/cacerts -storepass changeit -noprompt -alias $(echo $(basename $crt)) -file $crt; done;
           volumeMounts:
             - name: keystore
