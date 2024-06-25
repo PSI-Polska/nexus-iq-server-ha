@@ -51,12 +51,12 @@ spec:
               - key: fluentd
                 path: fluentd.yaml
         {{- end }}
-        {{- if .Values.iq_server.additionalCertificates.secretName }}
+        {{- if .Values.iq_server.additionalCertificatesSecret }}
         - name: keystore
           emptyDir: {}
         - name: certs
           secret:
-            secretName: {{ .Values.iq_server.additionalCertificates.secretName }}
+            secretName: {{ .Values.iq_server.additionalCertificatesSecret }}
         {{- end }}
       containers:
         - name: {{ .Release.Name }}-iq-server-container
@@ -108,7 +108,7 @@ spec:
             - mountPath: "/var/log/nexus-iq-server"
               name: {{ .Release.Name }}-iq-server-pod-logs
             {{- end }}
-            {{- if .Values.iq_server.additionalCertificates.secretName }}
+            {{- if .Values.iq_server.additionalCertificatesSecret }}
             - name: keystore
               mountPath: /var/ssl
             {{- end }}
@@ -240,7 +240,7 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.iq_server.config.clusterDirectory }}
               name: {{ .Release.Name }}-iq-server-pod-volume
-        {{- if .Values.iq_server.additionalCertificates.secretName }}
+        {{- if .Values.iq_server.additionalCertificatesSecret }}
         - name: {{ .Release.Name }}-import-certs
           image: {{ include "nexus-iq-server-ha.busyboxImage" . }}
           command:
