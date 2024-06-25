@@ -57,6 +57,8 @@ spec:
         - name: certs
           secret:
             secretName: {{ .Values.iq_server.additionalCertificatesSecret }}
+        - name: anchors
+          emptyDir: {}
         {{- end }}
       containers:
         - name: {{ .Release.Name }}-iq-server-container
@@ -112,6 +114,8 @@ spec:
             - name: keystore
               mountPath: /etc/alternatives/jre/lib/security/cacerts
               subPath: cacerts
+            - name: anchors
+              mountPath: /etc/pki/ca-trust/source/anchors
             {{- end }}
           env:
             {{- if or (.Values.iq_server.licenseSecret) (.Values.iq_server.license) }}
@@ -251,16 +255,18 @@ spec:
               set -e;
               cp /etc/alternatives/jre/lib/security/cacerts /keystore/cacerts;
               chmod 664 /keystore/cacerts;
-              for crt in /tmp/certs/*.*
+              for crt in /certs/*.*
               do
                 echo "Adding $crt to keystore";
                 keytool -import -keystore /keystore/cacerts -storepass changeit -noprompt -alias $(basename $crt) -file $crt;
-                cp $crt /etc/pki/ca-trust/source/anchors/$(basename $crt);
+                cp $crt /anchors/$(basename $crt);
               done;
               update-ca-trust;
           volumeMounts:
             - name: keystore
               mountPath: /keystore
             - name: certs
-              mountPath: /tmp/certs
+              mountPath: /certs
+            - name: anchors
+              mountPath: /anchors
         {{ end }}
